@@ -12,7 +12,8 @@ This will give you a client you can use to access the Concierge Service
 
     cbag --help
 
-Creating a bag is fast and easy, point the client at a Remote File Manifest
+Creating a bag is fast and easy, point the client at a
+[Remote File Manifest](https://github.com/fair-research/bdbag/blob/master/doc/config.md#remote-file-manifest)
 and it will create it along with a minid.
 
     cbag login globus
