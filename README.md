@@ -10,5 +10,14 @@ Install using pip:
 
 This will give you a client you can use to access the Concierge Service
 
-    cbag
+    cbag --help
 
+Creating a bag is fast and easy, point the client at a Remote File Manifest
+and it will create it along with a minid.
+
+    cbag login globus
+    cbag create my_remote_file_manifest.json concierge-test
+
+The result is a valid minid identifier that can be queried with the minid client:
+
+    minid ark:/99999/fk4hq54x0r
