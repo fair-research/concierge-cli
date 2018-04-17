@@ -1,3 +1,5 @@
+import os
+import sys
 import click
 import json
 from concierge.globus_login import login as glogin
@@ -11,8 +13,14 @@ def main():
     pass
 
 
-@main.command(help='Login with Globus')
-def globus_login():
+@main.group(help='Login for authorization with the Concierge '
+                 'and Minid services')
+def login():
+    pass
+
+
+@login.command(help='Login with Globus')
+def globus():
     glogin()
 
 
@@ -22,17 +30,29 @@ def globus_login():
 @click.argument('remote_file_manifest')
 @click.argument('title')
 def create(remote_file_manifest, title, server):
-    info = get_info()
-    access_token = info['tokens']['auth.globus.org']['access_token']
+    if not os.path.exists(remote_file_manifest):
+        click.echo('Remote File Manifest "{}" '
+                   'does not exist'.format(remote_file_manifest))
+        sys.exit(2)
     with open(remote_file_manifest) as f:
         try:
+            # this should take an optional metadata
+            info = get_info()
+            access_token = info['tokens']['auth.globus.org']['access_token']
             rfm_file = json.loads(f.read())
             bag = create_bag(server, rfm_file, info['name'],
                              info['email'], title, access_token)
-            click.echo('{} created at {}'.format(bag['minid_id'],
-                                                 bag['location']))
+            click.echo('{}'.format(bag['minid_id']))
         except ConciergeException as ce:
             click.echo('Error Creating Bag: {}'.format(ce.message))
+
+
+def update(path, minid):
+    pass
+
+
+def get(minid):
+    pass
 
 
 @click.command()

@@ -9,8 +9,9 @@ class ConciergeException(Exception):
             that should be taken.
         """
         self.code = code or 'UnexpectedError'
-        self.message = message or 'There was an unexpected error ' \
-                                  'contacting the Concierge Server.'
+        self.message = message or ('The Concierge Server encountered an '
+                                   'error, please contact your system '
+                                   'administrator.')
 
     def __str__(self):
         return '{}: {}'.format(self.code, self.message)
@@ -24,5 +25,5 @@ class LoginRequired(ConciergeException):
     def __init__(self, message=''):
         super(LoginRequired, self).__init__(self)
         self.code = 'LoginRequired'
-        self.message = message or ('A login is required due to expired or '
-                                   'non-existant credentials')
+        self.message = ('A login is required due to expired or '
+                        'non-existant credentials')

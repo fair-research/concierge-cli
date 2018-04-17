@@ -1,5 +1,31 @@
 import requests
-from concierge.exc import ConciergeException
+from requests import codes
+from concierge.exc import ConciergeException, LoginRequired
+
+
+def _concierge_response(response):
+    try:
+        rjson = response.json()
+    except ValueError:
+        raise ConciergeException(message='')
+    err_code = rjson.get('code', '')
+    messages = ','.join(
+        ['{}: {}'.format(k, ','.join(v) if isinstance(v, list) else v)
+         for k, v in rjson.items() if k != 'code'])
+
+    err_map = {
+        codes.BAD_REQUEST: ConciergeException(code=err_code, message=messages),
+        codes.UNAUTHORIZED: LoginRequired(),
+        codes.SERVER_ERROR: ConciergeException(code=err_code, message=messages)
+    }
+    concern = err_map.get(response.status_code)
+    if concern:
+        raise concern
+    elif response.status_code in [codes.ALL_GOOD, codes.ACCEPTED,
+                                  codes.CREATED]:
+        return rjson
+    else:
+        raise ConciergeException(**rjson)
 
 
 def create_bag(server, remote_file_manifest, name, email, title, bearer_token):
@@ -22,10 +48,7 @@ def create_bag(server, remote_file_manifest, name, email, title, bearer_token):
     }
     url = '{}/api/bags/'.format(server)
     response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 201:
-        return response.json()
-    else:
-        raise ConciergeException()
+    return _concierge_response(response)
 
 
 def update_bag():
