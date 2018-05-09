@@ -25,8 +25,8 @@ def globus():
 
 
 @main.command(help='Create a BDBag with a Remote File Manifest')
-@click.option('--server', help='Concierge server',
-              default='https://concierge.nick.globuscs.info')
+@click.option('--server', '-s', help='Concierge server to use',
+              default='https://concierge.fair-research.org')
 @click.argument('remote_file_manifest')
 @click.argument('title')
 def create(remote_file_manifest, title, server):
