@@ -21,8 +21,10 @@ def login():
 
 
 @login.command(help='Login with Globus')
-def globus():
-    glogin()
+@click.option('--browser/--no-browser', default=True,
+              help='Set whether client automatically opens a browser.')
+def globus(browser):
+    glogin(browser=browser)
 
 
 @main.command(help='Create a BDBag with a Remote File Manifest')

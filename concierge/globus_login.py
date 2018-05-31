@@ -17,11 +17,12 @@ SCOPES = ('openid email profile '
 get_input = getattr(__builtins__, 'raw_input', input)
 
 
-def login():
+def login(browser=True):
     tokens = do_native_app_authentication(
         client_id=CLIENT_ID,
         redirect_uri=REDIRECT_URI,
-        requested_scopes=SCOPES)
+        requested_scopes=SCOPES,
+        browser=browser)
     save_info_to_file(INFO_FILE, tokens)
 
 
@@ -48,7 +49,7 @@ def save_info_to_file(filepath, tokens):
 
 
 def do_native_app_authentication(client_id, redirect_uri,
-                                 requested_scopes=None):
+                                 requested_scopes=None, browser=False):
     """
     Does a Native App authentication flow and returns a
     dict of tokens keyed by service name.
@@ -64,7 +65,7 @@ def do_native_app_authentication(client_id, redirect_uri,
 
     print('Native App Authorization URL: \n{}'.format(url))
 
-    if not is_remote_session():
+    if not is_remote_session() and browser:
         # There was a bug in webbrowser recently that this fixes:
         # https://bugs.python.org/issue30392
         if sys.platform == 'darwin':
