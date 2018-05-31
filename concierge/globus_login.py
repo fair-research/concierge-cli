@@ -3,6 +3,7 @@ import os
 import json
 import globus_sdk
 from globus_sdk.exc import TransferAPIError
+from six.moves import input
 import webbrowser
 from concierge.exc import LoginRequired
 
@@ -11,11 +12,6 @@ INFO_FILE = os.path.join(os.getenv('HOME'), '.concierge_client_tokens.json')
 REDIRECT_URI = 'https://auth.globus.org/v2/web/auth-code'
 SCOPES = ('openid email profile '
           'urn:globus:auth:scope:transfer.api.globus.org:all')
-
-
-# Input function for either python2 or python3
-get_input = getattr(__builtins__, 'raw_input', input)
-
 
 def login():
     tokens = do_native_app_authentication(
@@ -72,7 +68,7 @@ def do_native_app_authentication(client_id, redirect_uri,
         else:
             webbrowser.open(url, new=1)
 
-    auth_code = get_input('Enter the auth code: ').strip()
+    auth_code = input('Enter the auth code: ').strip()
 
     token_response = client.oauth2_exchange_code_for_tokens(auth_code)
     tokens = token_response.by_resource_server
