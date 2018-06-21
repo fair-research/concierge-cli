@@ -1,6 +1,7 @@
 import requests
 from requests import codes
 from concierge.exc import ConciergeException, LoginRequired
+from concierge import DEFAULT_CONCIERGE_SERVER
 
 
 def _concierge_response(response):
@@ -65,3 +66,15 @@ def update_bag():
 
 def get_bag():
     pass
+
+
+def stage_bag(minids, endpoint, bearer_token, prefix='',
+              server=DEFAULT_CONCIERGE_SERVER,
+              transfer_token=None):
+    headers = {'Authorization': 'Bearer {}'.format(bearer_token)}
+    data = {'bag_minids': [minids], 'destination_endpoint': endpoint,
+            'transfer_token': transfer_token,
+            'destination_path_prefix': prefix}
+    url = '{}/api/stagebag/'.format(server)
+    response = requests.post(url, headers=headers, json=data)
+    return _concierge_response(response)

@@ -13,6 +13,7 @@ REDIRECT_URI = 'https://auth.globus.org/v2/web/auth-code'
 SCOPES = ('openid email profile '
           'urn:globus:auth:scope:transfer.api.globus.org:all')
 
+
 def login():
     tokens = do_native_app_authentication(
         client_id=CLIENT_ID,

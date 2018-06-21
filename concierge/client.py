@@ -5,8 +5,10 @@ import json
 import requests
 from concierge.globus_login import login as glogin
 from concierge.globus_login import get_info
-from concierge.api import create_bag
+from concierge.api import create_bag, stage_bag
 from concierge.exc import ConciergeException
+
+from concierge import DEFAULT_CONCIERGE_SERVER
 
 
 @click.group()
@@ -29,7 +31,7 @@ def globus():
 @click.option('--ro-metadata', type=click.File('r'), nargs=1)
 @click.option('--metadata', '-m', type=click.File('r'), nargs=1)
 @click.option('--server', '-s', help='Concierge server to use',
-              default='https://concierge.fair-research.org')
+              default=DEFAULT_CONCIERGE_SERVER)
 @click.argument('remote_file_manifest', type=click.File('r'))
 @click.argument('title')
 def create(remote_file_manifest, title, server, metadata, ro_metadata):
@@ -62,6 +64,29 @@ def update(path, minid):
 
 def get(minid):
     pass
+
+
+@main.command(help='Stage a BDBag with a Minid')
+@click.option('--server', '-s', help='Concierge server to use',
+              default=DEFAULT_CONCIERGE_SERVER)
+@click.argument('minids')
+@click.argument('destination_endpoint')
+@click.argument('path')
+def stage(minids, destination_endpoint, path, server):
+    try:
+        info = get_info()
+        # this should take an optional metadata
+        auth_token = info['tokens']['auth.globus.org']['access_token']
+        transfer_token = \
+            info['tokens']['transfer.api.globus.org']['access_token']
+        result = stage_bag(minids, destination_endpoint, auth_token,
+                           transfer_token=transfer_token,
+                           prefix=path, server=server)
+        click.echo('{}'.format(result))
+    except ConciergeException as ce:
+        click.echo('Error Creating Bag: {}'.format(ce.message), err=True)
+    except requests.exceptions.ConnectionError as ce:
+        click.echo(str(ce), err=True)
 
 
 @click.command()
