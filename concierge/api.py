@@ -29,8 +29,8 @@ def _concierge_response(response):
         raise ConciergeException(**rjson)
 
 
-def create_bag(server, remote_file_manifest, name, email, title, bearer_token,
-               metadata={}, ro_metadata={}):
+def create_bag(remote_file_manifest, name, email, title, bearer_token,
+               metadata={}, ro_metadata={}, server=DEFAULT_CONCIERGE_SERVER):
     """
     :param remote_file_manifest: The BDBag remote file manifest for the bag.
     Docs can be found here:
@@ -69,11 +69,9 @@ def get_bag():
 
 
 def stage_bag(minids, endpoint, bearer_token, prefix='',
-              server=DEFAULT_CONCIERGE_SERVER,
-              transfer_token=None):
+              server=DEFAULT_CONCIERGE_SERVER):
     headers = {'Authorization': 'Bearer {}'.format(bearer_token)}
     data = {'bag_minids': [minids], 'destination_endpoint': endpoint,
-            'transfer_token': transfer_token,
             'destination_path_prefix': prefix}
     url = '{}/api/stagebag/'.format(server)
     response = requests.post(url, headers=headers, json=data)

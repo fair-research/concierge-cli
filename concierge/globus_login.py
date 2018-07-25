@@ -6,12 +6,12 @@ from globus_sdk.exc import TransferAPIError
 from six.moves import input
 import webbrowser
 from concierge.exc import LoginRequired
+from concierge import CONCIERGE_SCOPE
 
 CLIENT_ID = 'd686ffce-63be-4dd4-9094-42008f754d0c'
 INFO_FILE = os.path.join(os.getenv('HOME'), '.concierge_client_tokens.json')
 REDIRECT_URI = 'https://auth.globus.org/v2/web/auth-code'
-SCOPES = ('openid email profile '
-          'urn:globus:auth:scope:transfer.api.globus.org:all')
+SCOPES = (CONCIERGE_SCOPE, 'profile', 'email', 'openid')
 
 
 def login():
