@@ -29,16 +29,12 @@ def _concierge_response(response):
         raise ConciergeException(**rjson)
 
 
-def create_bag(remote_file_manifest, name, email, title, bearer_token,
-               metadata={}, ro_metadata={}, server=DEFAULT_CONCIERGE_SERVER):
+def create_bag(remote_file_manifest, bearer_token, metadata={}, ro_metadata={},
+               server=DEFAULT_CONCIERGE_SERVER, test=False):
     """
     :param remote_file_manifest: The BDBag remote file manifest for the bag.
     Docs can be found here:
     https://github.com/fair-research/bdbag/blob/master/doc/config.md#remote-file-manifest  # noqa
-    :param name: The name that will be under on the Minid Service
-    :param email: The email that will be used (Must be a
-                    globus-linked-identity)
-    :param title: The title of the minid
     :param bearer_token: A User Globus access token
     :param metadata: Optional metadata for the bdbag. Must be a dict of the
                      format:
@@ -51,9 +47,8 @@ def create_bag(remote_file_manifest, name, email, title, bearer_token,
     """
     headers = {'Authorization': 'Bearer {}'.format(bearer_token)}
     data = {
-      'minid_user': name, 'minid_email': email, 'minid_title': title,
-      'remote_files_manifest': remote_file_manifest, 'metadata': metadata,
-      'ro_metadata': ro_metadata
+        'remote_file_manifest': remote_file_manifest, 'metadata': metadata,
+        'ro_metadata': ro_metadata, 'minid_test': test
     }
     url = '{}/api/bags/'.format(server)
     response = requests.post(url, headers=headers, json=data)
@@ -71,7 +66,7 @@ def get_bag():
 def stage_bag(minids, endpoint, bearer_token, prefix='',
               server=DEFAULT_CONCIERGE_SERVER):
     headers = {'Authorization': 'Bearer {}'.format(bearer_token)}
-    data = {'bag_minids': [minids], 'destination_endpoint': endpoint,
+    data = {'minids': minids, 'destination_endpoint': endpoint,
             'destination_path_prefix': prefix}
     url = '{}/api/stagebag/'.format(server)
     response = requests.post(url, headers=headers, json=data)
