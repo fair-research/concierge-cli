@@ -45,27 +45,38 @@ def info(minid, server):
 
 @main.command(help='Create a Minid-Referenced BDBag with a '
                    'Remote File Manifest')
-@click.option('--test/--no-test', default=False)
-@click.option('--ro-metadata', type=click.File('r'), nargs=1)
-@click.option('--metadata', '-m', type=click.File('r'), nargs=1)
+@click.option('--minid-metadata', type=click.File('r'), nargs=1)
+@click.option('--minid-test/--no-minid-test', default=False)
+@click.option('--bag-name', help='Filename for the bdbag')
+@click.option('--bag-ro-metadata', type=click.File('r'), nargs=1)
+@click.option('--bag-metadata', '-m', type=click.File('r'), nargs=1)
 @click.option('--server', '-s', help='Concierge server to use',
               default=DEFAULT_CONCIERGE_SERVER)
 @click.argument('remote_file_manifest', type=click.File('r'))
-def create(remote_file_manifest, server, metadata, ro_metadata, test):
+def create(remote_file_manifest, server, bag_metadata,
+           bag_ro_metadata, bag_name, minid_test, minid_metadata):
     try:
         # this should take an optional metadata
         info = get_info()
         bearer_token = info[CONCIERGE_SCOPE_NAME]['access_token']
         rfm_file = json.loads(remote_file_manifest.read())
-        bag_metadata, ro_bag_metadata = {}, {}
-        if metadata:
-            bag_metadata = json.loads(metadata.read())
-        if ro_metadata:
-            ro_bag_metadata = json.loads(ro_metadata.read())
-        if any([isinstance(v, dict) for v in bag_metadata.values()]):
+        bag_metadata_dict, bag_ro_metadata_dict = {}, {}
+        minid_metadata_dict = {}
+        if bag_metadata:
+            bag_metadata_dict = json.loads(bag_metadata.read())
+        if bag_ro_metadata:
+            bag_ro_metadata_dict = json.loads(bag_ro_metadata.read())
+        if minid_metadata:
+            minid_metadata_dict = json.loads(minid_metadata.read())
+        if any([isinstance(v, dict) for v in bag_metadata_dict.values()]):
             click.echo('Warning: Metadata contains complex objects.', err=True)
-        bag = bag_create(rfm_file, bearer_token, metadata=bag_metadata,
-                         ro_metadata=ro_bag_metadata, server=server, test=test)
+        bag = bag_create(rfm_file, bearer_token,
+                         minid_metadata=minid_metadata_dict,
+                         bag_metadata=bag_metadata_dict,
+                         bag_ro_metadata=bag_ro_metadata_dict,
+                         bag_name=bag_name,
+                         server=server,
+                         minid_test=minid_test)
         click.echo('{}'.format(bag['minid']))
     except ConciergeException as ce:
         click.echo('Error Creating Bag: {}'.format(ce.message), err=True)
