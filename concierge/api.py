@@ -31,7 +31,7 @@ def _concierge_response(response):
 
 def bag_create(remote_file_manifest, bearer_token, minid_metadata={},
                minid_test=False, minid_visible_to=('public',), bag_name='',
-               bag_metadata={}, bag_ro_metadata={}, verify_remote_files=True,
+               bag_metadata={}, bag_ro_metadata={}, verify_remote_files=False,
                server=DEFAULT_CONCIERGE_SERVER):
     """
     :param remote_file_manifest: The BDBag remote file manifest for the bag.
