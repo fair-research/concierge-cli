@@ -1,5 +1,4 @@
-import os
-import sys
+from pprint import pprint
 import click
 import json
 import requests
@@ -7,7 +6,7 @@ from functools import reduce
 from urllib.parse import urlencode
 from concierge.globus_login import login as glogin
 from concierge.globus_login import get_info
-from concierge.api import create_bag, stage_bag
+from concierge.api import bag_create, bag_stage, bag_info
 from concierge.exc import ConciergeException
 from concierge.version import __version__
 
@@ -33,6 +32,17 @@ def globus():
     glogin()
 
 
+@main.command(help='Get info on a Minid')
+@click.option('--server', '-s', help='Concierge server to use',
+              default=DEFAULT_CONCIERGE_SERVER)
+@click.argument('minid')
+def info(minid, server):
+    try:
+        pprint(bag_info([minid])[0])
+    except ConciergeException as ce:
+        click.echo('{}: {}'.format(ce.code, ce.message))
+
+
 @main.command(help='Create a Minid-Referenced BDBag with a '
                    'Remote File Manifest')
 @click.option('--test/--no-test', default=False)
@@ -54,7 +64,7 @@ def create(remote_file_manifest, server, metadata, ro_metadata, test):
             ro_bag_metadata = json.loads(ro_metadata.read())
         if any([isinstance(v, dict) for v in bag_metadata.values()]):
             click.echo('Warning: Metadata contains complex objects.', err=True)
-        bag = create_bag(rfm_file, bearer_token, metadata=bag_metadata,
+        bag = bag_create(rfm_file, bearer_token, metadata=bag_metadata,
                          ro_metadata=ro_bag_metadata, server=server, test=test)
         click.echo('{}'.format(bag['minid']))
     except ConciergeException as ce:
@@ -84,7 +94,7 @@ def stage(minids, destination_endpoint, path, server):
         info = get_info()
         # this should take an optional metadata
         bearer_token = info[CONCIERGE_SCOPE_NAME]['access_token']
-        result = stage_bag(minids, destination_endpoint, bearer_token,
+        result = bag_stage(minids, destination_endpoint, bearer_token,
                            prefix=path, server=server)
         transferred = result['transfer_catalog'].values()
         if len(transferred) == 1:
