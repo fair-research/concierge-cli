@@ -57,7 +57,7 @@ def bag_create(remote_file_manifest, bearer_token, minid_metadata={},
         'minid_metadata': minid_metadata,
         'minid_test': minid_test,
         'minid_visible_to': minid_visible_to,
-        'bag_name': bag_name,
+        'bag_name': bag_name if bag_name is not None else '',
         'bag_metadata': bag_metadata,
         'bag_ro_metadata': bag_ro_metadata,
         'verify_remote_files': verify_remote_files
