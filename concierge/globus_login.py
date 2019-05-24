@@ -6,12 +6,13 @@ from globus_sdk.exc import TransferAPIError
 from six.moves import input
 import webbrowser
 from concierge.exc import LoginRequired
+from concierge import CONCIERGE_SCOPE
 
 CLIENT_ID = 'd686ffce-63be-4dd4-9094-42008f754d0c'
 INFO_FILE = os.path.join(os.getenv('HOME'), '.concierge_client_tokens.json')
 REDIRECT_URI = 'https://auth.globus.org/v2/web/auth-code'
-SCOPES = ('openid email profile '
-          'urn:globus:auth:scope:transfer.api.globus.org:all')
+SCOPES = (CONCIERGE_SCOPE,)
+
 
 def login():
     tokens = do_native_app_authentication(
@@ -72,17 +73,7 @@ def do_native_app_authentication(client_id, redirect_uri,
 
     token_response = client.oauth2_exchange_code_for_tokens(auth_code)
     tokens = token_response.by_resource_server
-    access_token = tokens['auth.globus.org']['access_token']
-    atclient = globus_sdk.AuthClient(
-        authorizer=globus_sdk.AccessTokenAuthorizer(access_token))
-    info = atclient.oauth2_userinfo()
-    user_info = {
-        'tokens': tokens,
-        'name': info['name'],
-        'email': info['email'],
-        'sub': info['sub']
-    }
-    return user_info
+    return tokens
 
 
 def is_remote_session():
