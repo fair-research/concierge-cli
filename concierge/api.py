@@ -66,22 +66,31 @@ def bag_create(remote_file_manifest, bearer_token, minid_metadata={},
     response = requests.post(url, headers=headers, json=data)
     return _concierge_response(response)
 
+
 def bag_info(minids, server=DEFAULT_CONCIERGE_SERVER):
     base_url = 'https://identifiers.globus.org/'
     all_minid_info = []
     for minid in minids:
         if not minid.startswith('ark:/'):
-            raise ConciergeException(code='BadInput',
+            raise ConciergeException(
+                code='BadInput',
                 message='"{}" is not a valid minid!'.format(minid))
         all_minid_info.append(requests.get(base_url + minid).json())
     return all_minid_info
 
 
-def bag_stage(minids, endpoint, bearer_token, prefix='',
-              server=DEFAULT_CONCIERGE_SERVER):
+def bag_stage(minids, endpoint, bearer_token, prefix='', bag_dirs=False,
+              transfer_label=None, server=DEFAULT_CONCIERGE_SERVER):
     headers = {'Authorization': 'Bearer {}'.format(bearer_token)}
     data = {'minids': minids, 'destination_endpoint': endpoint,
-            'destination_path_prefix': prefix}
+            'destination_path_prefix': prefix,
+            'transfer_label': transfer_label, 'bag_dirs': bag_dirs}
     url = '{}/api/stagebag/'.format(server)
     response = requests.post(url, headers=headers, json=data)
+    return _concierge_response(response)
+
+
+def bag_stage_info(minid=None, stage_id=None, server=DEFAULT_CONCIERGE_SERVER):
+    url = '{}/api/stagebag/'.format(server)
+    response = requests.get(url)
     return _concierge_response(response)

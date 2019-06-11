@@ -94,19 +94,25 @@ def get(minid):
 
 @main.command(help='Stage a BDBag referred to by a Minid. Specify multiple '
                    'minids by commas.')
-@click.option('--server', '-s', help='Concierge server to use',
-              default=DEFAULT_CONCIERGE_SERVER)
 @click.argument('minids')
 @click.argument('destination_endpoint')
 @click.argument('path', default='')
-def stage(minids, destination_endpoint, path, server):
+@click.option('--server', '-s', help='Concierge server to use',
+              default=DEFAULT_CONCIERGE_SERVER)
+@click.option('--bag-dirs', default=False, is_flag=True,
+              help='Use dirs within the bag instead of source path')
+@click.option('--transfer-label', default=False,
+              help='Label for the concierge transfer')
+def stage(minids, destination_endpoint, path, server, bag_dirs,
+          transfer_label):
     try:
         minids = minids.split(',')
         info = get_info()
         # this should take an optional metadata
         bearer_token = info[CONCIERGE_SCOPE_NAME]['access_token']
         result = bag_stage(minids, destination_endpoint, bearer_token,
-                           prefix=path, server=server)
+                           prefix=path, server=server, bag_dirs=bag_dirs,
+                           transfer_label=transfer_label)
         transferred = result['transfer_catalog'].values()
         if len(transferred) == 1:
             num_transferred = len(list(transferred)[0])
