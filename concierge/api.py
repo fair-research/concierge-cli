@@ -1,5 +1,7 @@
+import os
 import requests
 from requests import codes
+from minid import MinidClient
 from concierge.exc import ConciergeException, LoginRequired
 from concierge import DEFAULT_CONCIERGE_SERVER
 
@@ -67,20 +69,14 @@ def bag_create(remote_file_manifest, bearer_token, minid_metadata={},
     return _concierge_response(response)
 
 
-def bag_info(minids, server=DEFAULT_CONCIERGE_SERVER):
-    base_url = 'https://identifiers.globus.org/'
-    all_minid_info = []
-    for minid in minids:
-        if not minid.startswith('ark:/'):
-            raise ConciergeException(
-                code='BadInput',
-                message='"{}" is not a valid minid!'.format(minid))
-        all_minid_info.append(requests.get(base_url + minid).json())
-    return all_minid_info
+def bag_info(minids):
+    mc = MinidClient()
+    return [mc.check(mc.to_minid(m)).data for m in minids]
 
 
 def bag_stage(minids, endpoint, bearer_token, prefix='', bag_dirs=False,
               transfer_label=None, server=DEFAULT_CONCIERGE_SERVER):
+    transfer_label = transfer_label or 'Concierge Stage to {}'.format(endpoint)
     headers = {'Authorization': 'Bearer {}'.format(bearer_token)}
     data = {'minids': minids, 'destination_endpoint': endpoint,
             'destination_path_prefix': prefix,
