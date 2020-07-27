@@ -1,5 +1,4 @@
 import os
-import json
 from minid import MinidClient
 import globus_sdk
 import fair_research_login
@@ -22,13 +21,13 @@ class ConciergeClient(globus_sdk.base.BaseClient):
 
     def __init__(self, *args, **kwargs):
         self.SCOPES = [self.CONCIERGE_SCOPE]
-        kwargs['base_url'] = kwargs.get('base_url') or self.CONCIERGE_API
-        kwargs.update(dict(client_id=self.CLIENT_ID, scopes=self.SCOPES,
-                           app_name=self.APP_NAME))
+        env = os.getenv('CONCIERGE_ENV', 'production')
+        kwargs['base_url'] = kwargs.get('base_url', self.ENVIRONMENTS[env])
+        kwargs.update(dict(client_id=self.CLIENT_ID, app_name=self.APP_NAME))
         super().__init__('Concierge Client App', *args, **kwargs)
         self.native_client = fair_research_login.NativeClient(
             app_name=self.app_name, client_id=self.CLIENT_ID,
-            default_scopes=[self.SCOPES]
+            default_scopes=self.SCOPES,
         )
 
     @property
@@ -48,8 +47,8 @@ class ConciergeClient(globus_sdk.base.BaseClient):
     def is_logged_in(self):
         return bool(self.authorizer)
 
-    def login(self, refresh_tokens=False, no_local_server=True,
-              no_browser=True, force=False):
+    def login(self, refresh_tokens=False, no_local_server=False,
+              no_browser=False, force=False):
         """
         Authenticate with Globus for tokens to talk to the concierge service
         **Parameters**

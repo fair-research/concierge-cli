@@ -11,11 +11,10 @@ from concierge.version import __version__
 
 GLOBUS_WEB_TASK = 'https://app.globus.org/activity/{}/overview'
 GLOBUS_WEB_TRANSFER = 'https://app.globus.org/file-manager?{}'
-DEFAULT_CONCIERGE_SERVER = api.ConciergeClient.CONCIERGE_API
 
 
-def get_concierge_client(server=None):
-    return api.ConciergeClient(base_url=server)
+def get_concierge_client():
+    return api.ConciergeClient()
 
 
 @click.group()
@@ -56,11 +55,9 @@ def logout():
 
 
 @main.command(help='Get info on a Minid')
-@click.option('--server', '-s', help='Concierge server to use',
-              default=DEFAULT_CONCIERGE_SERVER)
 @click.argument('minid')
-def info(minid, server):
-    cc = get_concierge_client(server)
+def info(minid):
+    cc = get_concierge_client()
     try:
         pprint(cc.get_bag([minid])[0])
     except ConciergeException as ce:
@@ -74,12 +71,10 @@ def info(minid, server):
 @click.option('--bag-name', default='', help='Filename for the bdbag')
 @click.option('--bag-ro-metadata', type=click.File('r'), nargs=1)
 @click.option('--bag-metadata', '-m', type=click.File('r'), nargs=1)
-@click.option('--server', '-s', help='Concierge server to use',
-              default=DEFAULT_CONCIERGE_SERVER)
 @click.argument('remote_file_manifest', type=click.File('r'))
-def create(remote_file_manifest, server, bag_metadata,
+def create(remote_file_manifest, bag_metadata,
            bag_ro_metadata, bag_name, minid_test, minid_metadata):
-    cc = get_concierge_client(server)
+    cc = get_concierge_client()
     if not cc.is_logged_in():
         click.secho('You are not logged in', fg='red')
         return
@@ -122,16 +117,14 @@ def get(minid):
 @click.argument('minids')
 @click.argument('destination_endpoint')
 @click.argument('path', default='')
-@click.option('--server', '-s', help='Concierge server to use',
-              default=DEFAULT_CONCIERGE_SERVER)
 @click.option('--bag-dirs', default=False, is_flag=True,
               help='Use dirs within the bag instead of source path')
 @click.option('--transfer-label', default='Concierge Bag Transfer',
               help='Label for the concierge transfer')
-def stage(minids, destination_endpoint, path, server, bag_dirs,
+def stage(minids, destination_endpoint, path, bag_dirs,
           transfer_label):
 
-    cc = get_concierge_client(server)
+    cc = get_concierge_client()
     if not cc.is_logged_in():
         click.secho('You are not logged in', fg='red')
         return
