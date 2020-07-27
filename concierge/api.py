@@ -1,10 +1,10 @@
+import os
+import json
 from minid import MinidClient
 import globus_sdk
 import fair_research_login
 
-
-class ConciergeException(globus_sdk.exc.GlobusAPIError):
-    pass
+import concierge.exc
 
 
 class ConciergeClient(globus_sdk.base.BaseClient):
@@ -14,8 +14,11 @@ class ConciergeClient(globus_sdk.base.BaseClient):
         '524361f2-e4a9-4bd0-a3a6-03e365cac8a9/concierge'
     )
     APP_NAME = 'Concierge Client'
-    CONCIERGE_API = 'https://concierge.fair-research.org/api'
-    error_class = ConciergeException
+    ENVIRONMENTS = {
+        'production': 'https://concierge.fair-research.org/api/',
+        'local': 'http://localhost:8000/api/',
+    }
+    error_class = concierge.exc.ConciergeException
 
     def __init__(self, *args, **kwargs):
         self.SCOPES = [self.CONCIERGE_SCOPE]

@@ -64,7 +64,7 @@ def info(minid, server):
     try:
         pprint(cc.get_bag([minid])[0])
     except ConciergeException as ce:
-        click.echo('{}: {}'.format(ce.code, ce.message))
+        click.echo(json.dumps(ce.message, indent=4), err=True)
 
 
 @main.command(help='Create a Minid-Referenced BDBag with a '
@@ -103,7 +103,8 @@ def create(remote_file_manifest, server, bag_metadata,
                             bag_name=bag_name, minid_test=minid_test)
         click.echo('{}'.format(bag['minid']))
     except ConciergeException as ce:
-        click.echo('Error Creating Bag: {}'.format(ce.message), err=True)
+        click.echo(f'Error Creating Bag: \n {json.dumps(ce.errors, indent=4)}',
+                   err=True)
     except requests.exceptions.ConnectionError as ce:
         click.echo(str(ce), err=True)
 
@@ -164,7 +165,8 @@ def stage(minids, destination_endpoint, path, server, bag_dirs,
         )
         click.echo('{}'.format(report))
     except ConciergeException as ce:
-        click.echo('Error Creating Bag: {}'.format(ce.message), err=True)
+        click.echo(f'Error Staging Bag: \n {json.dumps(ce.errors, indent=4)}',
+                   err=True)
     except requests.exceptions.ConnectionError as ce:
         click.echo(str(ce), err=True)
 
